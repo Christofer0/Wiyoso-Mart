@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateOrderItemRequestDto {
+public class OrderItemRequestDto {
     @NotBlank
     private Long productId;
 

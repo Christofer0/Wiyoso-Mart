@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class CreateOrderResponseDto {
+public class OrderResponseDto {
     private Long orderId;
     private String status;    
 }

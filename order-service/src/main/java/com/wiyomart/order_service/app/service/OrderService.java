@@ -6,9 +6,9 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.wiyomart.order_service.app.dto.request.CreateOrderItemRequestDto;
-import com.wiyomart.order_service.app.dto.request.CreateOrderRequestDto;
-import com.wiyomart.order_service.app.dto.response.CreateOrderResponseDto;
+import com.wiyomart.order_service.app.dto.request.OrderItemRequestDto;
+import com.wiyomart.order_service.app.dto.request.OrderRequestDto;
+import com.wiyomart.order_service.app.dto.response.OrderResponseDto;
 import com.wiyomart.order_service.app.model.Order;
 import com.wiyomart.order_service.app.model.OrderItem;
 import com.wiyomart.order_service.app.model.OrderStatus;
@@ -24,18 +24,18 @@ public class OrderService {
     private final OrderRepository orderRepository;
 
     //create
-    public CreateOrderResponseDto createOrder(CreateOrderRequestDto request ){
+    public OrderResponseDto createOrder(OrderRequestDto request ){
         
         // 1. Buat Order
         Order order = new Order();
-        order.setUserId(1L);
+        order.setUserId(2L);
         order.setStatus(OrderStatus.CREATED);
 
         List<OrderItem> orderItems = new ArrayList<>();
         BigDecimal totalAmount = BigDecimal.ZERO;
 
         // 2. Loop Item 
-        for(CreateOrderItemRequestDto itemDto : request.getItems()){
+        for(OrderItemRequestDto itemDto : request.getItems()){
 
             // 3 buat order item
             OrderItem item = new OrderItem();
@@ -57,13 +57,13 @@ public class OrderService {
 
         // 4. Set ke Order 
         order.setItems(orderItems); 
-        order.setTotalAMount(totalAmount);
+        order.setTotalAmount(totalAmount);
 
         // 5. Simpan
         Order saveOrder = orderRepository.save(order);
 
         // 6. Response 
-        return new CreateOrderResponseDto(
+        return new OrderResponseDto(
             saveOrder.getId(),
             saveOrder.getStatus().name()
         );

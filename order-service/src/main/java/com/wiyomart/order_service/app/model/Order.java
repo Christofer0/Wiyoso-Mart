@@ -35,7 +35,7 @@ public class Order {
     private OrderStatus status = OrderStatus.CREATED;
 
     @Column(nullable = false)
-    private BigDecimal totalAMount;
+    private BigDecimal totalAmount;
 
     @OneToMany(mappedBy = "order",cascade = CascadeType.ALL)
     private List<OrderItem> items; 
