@@ -13,6 +13,7 @@ import com.wiyomart.order_service.app.dto.response.OrderResponseDto;
 import com.wiyomart.order_service.app.service.OrderService;
 import com.wiyomart.order_service.response.ApiResponse;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -25,12 +26,20 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<OrderResponseDto>> createOrder(
-            @Valid @RequestBody OrderRequestDto request) {
+            @Valid @RequestBody OrderRequestDto request,
+            HttpServletRequest httpServletRequest) {
 
-        OrderResponseDto response = orderService.createOrder(request);
+        Long userId = (Long) httpServletRequest.getAttribute("userId");
+
+        String authHeader = httpServletRequest.getHeader("Authorization");
+        String token = authHeader.substring(7); // hapus "Bearer "
+
+        OrderResponseDto response =
+                orderService.createOrder(userId, request, token);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.success(response, "Order created successfully"));
     }
+
 }

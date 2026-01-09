@@ -65,7 +65,7 @@ public class UserService {
 
             return userMapper.toResponseDto(savedUser);
             
-        }
+        }   
 
         //LOGIN
         public UserResponseDto login(String username, String password) {
@@ -80,7 +80,12 @@ public class UserService {
 
             Set<String> roles = responseDto.getRoles() != null ? responseDto.getRoles() : Set.of();
 
-            String jwtToken = jwtUtil.generateToken(user.getUsername(), roles);
+            
+            String jwtToken = jwtUtil.generateToken(
+                user.getId(),
+                user.getUsername(),
+                roles
+        );
 
             responseDto.setJwt_token(jwtToken);
 

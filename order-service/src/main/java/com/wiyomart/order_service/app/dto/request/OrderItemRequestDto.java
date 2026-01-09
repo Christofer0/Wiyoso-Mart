@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class OrderItemRequestDto {
     @NotBlank
-    private Long productId;
+    private String productId;
 
     @Positive
     private Integer quantity;

@@ -9,10 +9,12 @@ import org.springframework.stereotype.Service;
 import com.wiyomart.order_service.app.dto.request.OrderItemRequestDto;
 import com.wiyomart.order_service.app.dto.request.OrderRequestDto;
 import com.wiyomart.order_service.app.dto.response.OrderResponseDto;
+import com.wiyomart.order_service.app.dto.response.ProductResponseDto;
 import com.wiyomart.order_service.app.model.Order;
 import com.wiyomart.order_service.app.model.OrderItem;
 import com.wiyomart.order_service.app.model.OrderStatus;
 import com.wiyomart.order_service.app.repo.OrderRepository;
+import com.wiyomart.order_service.app.client.ProductClient;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -22,38 +24,41 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class OrderService {
     private final OrderRepository orderRepository;
-
+    private final ProductClient productClient;
     //create
-    public OrderResponseDto createOrder(OrderRequestDto request ){
+    public OrderResponseDto createOrder(Long userId,OrderRequestDto request,String token ){
         
         // 1. Buat Order
         Order order = new Order();
-        order.setUserId(2L);
+        order.setUserId(userId);
         order.setStatus(OrderStatus.CREATED);
 
         List<OrderItem> orderItems = new ArrayList<>();
         BigDecimal totalAmount = BigDecimal.ZERO;
 
         // 2. Loop Item 
-        for(OrderItemRequestDto itemDto : request.getItems()){
+        for (OrderItemRequestDto itemDto : request.getItems()) {
 
-            // 3 buat order item
+            ProductResponseDto product =
+                    productClient.getProductById(itemDto.getProductId(),token);
+
             OrderItem item = new OrderItem();
             item.setOrder(order);
             item.setProductId(itemDto.getProductId());
-
-            item.setProductName("DUummy Product");
-            item.setProductPrice(BigDecimal.valueOf(10000));
-
+            item.setProductName(product.getName());
+            item.setProductPrice(product.getPrice());
             item.setQuantity(itemDto.getQuantity());
 
-            BigDecimal subTotal = item.getProductPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
+            BigDecimal subTotal =
+                    product.getPrice()
+                        .multiply(BigDecimal.valueOf(itemDto.getQuantity()));
 
             item.setSubtotal(subTotal);
 
             totalAmount = totalAmount.add(subTotal);
             orderItems.add(item);
         }
+
 
         // 4. Set ke Order 
         order.setItems(orderItems); 
