@@ -10,21 +10,26 @@ import com.wiyomart.order_service.app.dto.request.OrderItemRequestDto;
 import com.wiyomart.order_service.app.dto.request.OrderRequestDto;
 import com.wiyomart.order_service.app.dto.response.OrderResponseDto;
 import com.wiyomart.order_service.app.dto.response.ProductResponseDto;
+import com.wiyomart.order_service.app.mapper.OrderMapper;
 import com.wiyomart.order_service.app.model.Order;
 import com.wiyomart.order_service.app.model.OrderItem;
 import com.wiyomart.order_service.app.model.OrderStatus;
 import com.wiyomart.order_service.app.repo.OrderRepository;
 import com.wiyomart.order_service.app.client.ProductClient;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class OrderService {
     private final OrderRepository orderRepository;
     private final ProductClient productClient;
+    private final OrderMapper orderMapper;
     //create
     public OrderResponseDto createOrder(Long userId,OrderRequestDto request,String token ){
         
@@ -68,11 +73,31 @@ public class OrderService {
         Order saveOrder = orderRepository.save(order);
 
         // 6. Response 
-        return new OrderResponseDto(
-            saveOrder.getId(),
-            saveOrder.getStatus().name()
-        );
+        // 6. Response 
+        return orderMapper.toResponseDto(saveOrder);
 
     }
+
+    //get all
+    public List<OrderResponseDto> getAllOrders() {
+        List<Order> orders = orderRepository.findAll();
+        return orderMapper.toResponseDtoList(orders);
+    }
+
+    // public OrderResponseDto getOrderById(Long orderId){
+    //     Order order = orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Order not found"));
+    //     return orderMapper.toResponseDto(order);
+    // }
+
+    public OrderResponseDto getOrderById(Long id) {
+    log.info("Fetching order with id: {}", id);
+    
+    Order order = orderRepository.findById(id)
+        .orElseThrow(() -> new EntityNotFoundException("Order not found with id: " + id));
+    
+    log.info("Order found - items size: {}", order.getItems() != null ? order.getItems().size() : "null");
+    
+    return orderMapper.toResponseDto(order);
+}
 
 }
