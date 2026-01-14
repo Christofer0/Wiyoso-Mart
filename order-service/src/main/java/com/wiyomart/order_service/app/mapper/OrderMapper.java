@@ -12,9 +12,8 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface OrderMapper {
 
-    // Tidak perlu INSTANCE kalau pakai Spring component model (Spring inject sendiri)
-
     @Mapping(target = "orderId", source = "id")
+    @Mapping(target = "userId", source = "userId")
     @Mapping(target = "status", expression = "java(order.getStatus() != null ? order.getStatus().name() : null)")
     @Mapping(target = "items", source = "items")
     OrderResponseDto toResponseDto(Order order);

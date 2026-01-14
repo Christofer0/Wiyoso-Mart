@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class OrderResponseDto {
     private Long orderId;
     private String status;    
-
+    private Long userId;
     private List<OrderItemResponseDto> items;
 }
 

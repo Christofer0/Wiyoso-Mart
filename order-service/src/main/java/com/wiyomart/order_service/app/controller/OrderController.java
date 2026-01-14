@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wiyomart.order_service.app.dto.request.OrderRequestDto;
+import com.wiyomart.order_service.app.dto.request.OrderUpdateStatusRequestDto;
 import com.wiyomart.order_service.app.dto.response.OrderResponseDto;
 import com.wiyomart.order_service.app.service.OrderService;
 import com.wiyomart.order_service.response.ApiResponse;
@@ -57,6 +59,15 @@ public class OrderController {
         public ResponseEntity<ApiResponse<OrderResponseDto>> getOrderById(@PathVariable Long id) {
                 OrderResponseDto result = orderService.getOrderById(id);
                 
+                return ResponseEntity.ok(
+                        ApiResponse.<OrderResponseDto>success(result, "Order retrieved successfully")
+                );
+        }
+
+        // /api/internal/orders/{id}/status
+        @PatchMapping("/{id}/status")
+        public ResponseEntity<ApiResponse<OrderResponseDto>>updateOrderStatus(@PathVariable Long id ,@RequestBody OrderUpdateStatusRequestDto request){
+                OrderResponseDto result = orderService.updateOrderStatus(id,request);
                 return ResponseEntity.ok(
                         ApiResponse.<OrderResponseDto>success(result, "Order retrieved successfully")
                 );

@@ -4,10 +4,13 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.naming.NameNotFoundException;
+
 import org.springframework.stereotype.Service;
 
 import com.wiyomart.order_service.app.dto.request.OrderItemRequestDto;
 import com.wiyomart.order_service.app.dto.request.OrderRequestDto;
+import com.wiyomart.order_service.app.dto.request.OrderUpdateStatusRequestDto;
 import com.wiyomart.order_service.app.dto.response.OrderResponseDto;
 import com.wiyomart.order_service.app.dto.response.ProductResponseDto;
 import com.wiyomart.order_service.app.mapper.OrderMapper;
@@ -15,9 +18,9 @@ import com.wiyomart.order_service.app.model.Order;
 import com.wiyomart.order_service.app.model.OrderItem;
 import com.wiyomart.order_service.app.model.OrderStatus;
 import com.wiyomart.order_service.app.repo.OrderRepository;
+import com.wiyomart.order_service.exception.NotFoundException;
 import com.wiyomart.order_service.app.client.ProductClient;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -73,7 +76,6 @@ public class OrderService {
         Order saveOrder = orderRepository.save(order);
 
         // 6. Response 
-        // 6. Response 
         return orderMapper.toResponseDto(saveOrder);
 
     }
@@ -84,20 +86,32 @@ public class OrderService {
         return orderMapper.toResponseDtoList(orders);
     }
 
-    // public OrderResponseDto getOrderById(Long orderId){
-    //     Order order = orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Order not found"));
-    //     return orderMapper.toResponseDto(order);
-    // }
+    //get by id
+    public OrderResponseDto getOrderById(Long orderId){
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Order not found"));
+        return orderMapper.toResponseDto(order);
+    }
 
-    public OrderResponseDto getOrderById(Long id) {
-    log.info("Fetching order with id: {}", id);
-    
-    Order order = orderRepository.findById(id)
-        .orElseThrow(() -> new EntityNotFoundException("Order not found with id: " + id));
-    
-    log.info("Order found - items size: {}", order.getItems() != null ? order.getItems().size() : "null");
-    
-    return orderMapper.toResponseDto(order);
-}
+    //patch
+    @Transactional
+    public OrderResponseDto updateOrderStatus(Long Id, OrderUpdateStatusRequestDto request){
+        Order order = orderRepository.findById(Id).orElseThrow(() -> new NotFoundException("Order Not Found"));
+        
+        if(request.getOrderStatus() !=null){
+            try{
+                OrderStatus newStatus = OrderStatus.valueOf(request.getOrderStatus().trim().toUpperCase());
+                order.setStatus(newStatus);
+            }catch(IllegalArgumentException e){
+                throw new IllegalArgumentException("Invalid order status"+request.getOrderStatus());
+            }
+            // order.setStatus(request.getOrderStatus());
+        }
 
+        Order updatedOrder = orderRepository.save(order);
+
+        return orderMapper.toResponseDto(updatedOrder);
+    }
+
+    
+    
 }
